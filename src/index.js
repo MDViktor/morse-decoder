@@ -39,13 +39,6 @@ const MORSE_TABLE = {
 
 function decode(expr) {
   let x = expr.split('');
-  let result = [];
-  let k = [
-    '0', '0', '1', '0',
-    '1', '1', '1', '0',
-    '1', '0'
-  ];
-  let a = "00101010100000000010001011101000101110100000111111**********00001011110000111111000010111000101110100000111010";
   // returns array of arrays by ten from input code
   const getArrayOfArraysByTen = (arg) => {
     let z = [];
@@ -56,17 +49,15 @@ function decode(expr) {
 
   // returns cleared array from input arrayByTen
   const clear = (arg) => {
+    // for (i=0;i<arg.length;i){
+    //   if (arg[i]==='*') return arg; 
+    // }
     for (i=0;i<arg.length;i){
-      let o = 0;
-      if (arg[i]==='*'){
-        arg.splice(0,10,' ');
-      } 
+      if (arg[i]==='*') return arg; 
       if (arg[i]!=='1') {
-        // o+=1 ;
         arg.shift();
       }
       else break; 
-      console.log(o);
     }
     return arg;
   }
@@ -76,6 +67,10 @@ function decode(expr) {
     let oper = '';
     let temp = [];
     for (i=0;i<arg.length;i+=2){
+      if (arg[i] === '*'){
+        arg.splice(0,arg.length,' ')
+        break
+      }
       while (temp.length<2){
         temp.push(arg[i]);
         temp.push(arg[i+1]);
@@ -86,30 +81,34 @@ function decode(expr) {
       if (temp.join('')==='10'){
         oper = '.';
       }
-      result.push(oper);
+      arg.splice(i,2,oper,'');
       temp.splice(0,2);
     }
-    return result;
+    return arg.filter(Boolean);
   }
 
   // returns decoded Letter  from Morse code
   const getDecoding = (arg) => {
-    let letter = '';
     for (let value in MORSE_TABLE){
+      let letter = '';
       if(value === arg.join('')){
         letter = MORSE_TABLE[value];
+        arg.splice(0,arg.length,letter);
       }
     }
-    return letter;
+    return arg;
   }
+  // form sentense from decoded letters
   const getSentence = (arg) => {
-    for (i=0;i<2;i++){
-      console.log(clear(arg[i]), i);
+    let result = []
+    for (let g of arg){
+      result.push(getDecoding(getMorse(clear(g))));
     }
+    return result.join('');
   }
-  // console.log(getDecoding(getMorse(clear(k))));
-  console.log(getSentence(getArrayOfArraysByTen(a.split(''))));
+return getSentence(getArrayOfArraysByTen(x));
 }
+
 
 module.exports = {
   decode
